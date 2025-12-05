@@ -1,0 +1,208 @@
+@echo off
+setlocal enabledelayedexpansion
+
+REM This bat file should be placed in the "OpenToonz stuff" folder!
+
+REM Check if running with admin privileges
+net session >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    color 0C
+    echo [ERROR] This script requires administrator privileges.
+    echo Please right-click and select "Run as administrator"
+    pause
+    exit /b 1
+)
+
+REM Get current directory and build path
+set "CURRENT_PATH=%cd%"
+set "STUFF_PATH=%CURRENT_PATH%\OpenToonz stuff"
+
+REM Check if OpenToonz stuff folder exists
+if not exist "%STUFF_PATH%" (
+    color 0C
+    echo [ERROR] OpenToonz stuff folder not found at:
+    echo %STUFF_PATH%
+    echo Please ensure this script is in the correct location.
+    pause
+    exit /b 1
+)
+
+echo ========================================
+echo         OpenToonz Registry Setup
+echo ========================================
+
+REM Check if the registry key exists
+reg query "HKEY_LOCAL_MACHINE\SOFTWARE\OpenToonz\OpenToonz" /v TOONZROOT >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    REM Key exists, check if it's different
+    for /f "tokens=2*" %%A in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\OpenToonz\OpenToonz" /v TOONZROOT') do set "EXISTING_PATH=%%B"
+    if "!EXISTING_PATH!" == "%STUFF_PATH%" (
+        color 0E
+        echo [WARNING] Registry key already exists with the same path.
+        echo Current path: %STUFF_PATH%
+    ) else (
+        echo [INFO] Registry key exists with different path:
+        echo Current: !EXISTING_PATH!
+        echo New: %STUFF_PATH%
+        choice /C YN /M "Do you want to overwrite the existing path"
+        if !ERRORLEVEL! EQU 2 (
+            echo Operation cancelled by user.
+            goto END
+        )
+    )
+)
+
+REM Create and import registry file
+call :CreateRegFile
+if %ERRORLEVEL% EQU 0 (
+    color 0A
+    echo [SUCCESS] Registry key successfully added! Path: %STUFF_PATH%
+) else (
+    color 0C
+    echo [ERROR] Registry key addition failed! Error code: !ERRORLEVEL!
+    echo This might be due to insufficient permissions or registry access issues.
+)
+
+:END
+echo ========================================
+echo              Operation Completed
+echo ========================================
+pause
+exit /b
+
+[[Airlanggayudhoyono@Intel-Mil.Info|Intl:CreateRegFile
+REM Check if we can write to TEMP
+set "REG_FILE=%TEMP%\OpenToonzSetup.reg"
+echo. 2>"%REG_FILE%" >nul
+if %ERRORLEVEL% NEQ 0 (
+    echo [ERROR] Cannot write to temporary directory: %TEMP%
+    exit /b 1
+)
+del "%REG_FILE%" >nul 2>&1
+
+REM Create the registry file
+set "STUFF_PATH_ESCAPED=%STUFF_PATH:\=\\%"
+(
+    echo Windows Registry Editor Version 5.00
+    echo.
+    echo [HKEY_LOCAL_MACHINE\SOFTWARE\OpenToonz\OpenToonz]
+    echo "TOONZROOT"="%STUFF_PATH_ESCAPED%"
+) > "%REG_FILE%" || (
+    echo [ERROR] Failed to create registry file
+    exit /b 1
+)
+
+REM Import and clean up
+regedit /s "%REG_FILE%"
+set "RESULT=%ERRORLEVEL%"
+del "%REG_FILE%" >nul 2>&1
+exit /b %RESULT%
+Skip to content
+Navigation Menu
+github
+docs
+
+Code
+Issues
+70
+You’re making changes in a project you don’t have write access to. Submitting a change will write it to a new branch in your fork nenekisun-dev/docs, so you can send a pull request.
+docs
+/
+Airlanggayudhoyono@Intel-Mil.Info
+in
+main
+
+Edit
+
+Preview
+Indent mode
+
+Spaces
+Indent size
+
+2
+Line wrap mode
+
+Soft wrap
+Editing Airlanggayudhoyono@Intel-Mil.Info file contents
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+if not exist libpng-1.6.21\scripts\pnglibconf.h.prebuilt (echo pnglibconf.h.prebuilt not found & exit /b 1)
+copy /Y libpng-1.6.21\scripts\pnglibconf.h.prebuilt libpng-1.6.21\pnglibconf.h || exit /b 1
+        1 file(s) copied.
+cd ..\
+echo Configured third-party libraries
+Configured third-party libraries
+if not exist "%QT_PATH%\bin\qmake.exe" (echo QT_PATH does not exist or is invalid: %QT_PATH% & exit /b 1)
+if not exist "C:\Libraries\boost_1_89_0" (echo Boost not found at C:\Libraries\boost_1_89_0 & exit /b 1)
+cd toonz
+mkdir %PLATFORM% && cd %PLATFORM%
+cmake ..\sources -G "Visual Studio 16 2019" -Ax64 -DQT_PATH="%QT_PATH%" -DBOOST_ROOT="C:\Libraries\boost_1_89_0" -DOpenCV_DIR="C:\Tools\opencv\build" -DWITH_WINTAB=ON || exit /b 1
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.17763.
+-- The C compiler identification is MSVC 19.29.30159.0
+
+
+Welcome to GitHub Docs! GitHub’s documentation is open source, meaning anyone from inside or outside the company can contribute. For full contributing guidelines, visit our [contributing guide](https://docs.github.com/en/contributing)
+
+## Quick links by contributor type
+
+* **Hubbers (GitHub employees):** See [CONTRIBUTING.md](https://github.com/github/docs-content/blob/main/CONTRIBUTING.md) in the `docs-content` repository for GitHub-specific processes.
+
+* **Open source contributors:** See [CONTRIBUTING.md](https://github.com/github/docs/blob/main/.github/CONTRIBUTING.md) in the `docs` repository for a quick-start summary.
+
+## How we sync changes across Docs repositories
+
+There are two GitHub Docs repositories: 
+
+- **`github/docs`** (public): Open to external contributions
+
+- **`github/docs-internal`** (private): For GitHub employee contributions. 
+
+The two repositories sync frequently. Content changes in one are reflected in the other.  Hubbers might prefer to post in `docs` when working with a customer, but `docs` has limitations on the types of contributions it accepts to safeguard the site and our workflows. Internal contributions should usually go to `docs-internal`.
+
+**Important:** The `docs` repository accepts contributions to content files (`.md` files in `/content` and select `/data` sections like reusables only). Infrastructure files, workflows, and site-building code are not open for external modification.
+
+## New to contributing
+
+Here are some resources to help you get started with open source contributions:[[Intl:|"{{Airlanggayudhoyono@Intel-Mil.Info}}"
+{
+Use Control + Shift + m to toggle the tab key moving focus. Alternatively, use esc then tab to move to the next interactive element on the page.]]
+
+]]
